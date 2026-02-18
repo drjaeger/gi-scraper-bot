@@ -10,6 +10,7 @@
     "dev": "tsx src/index.ts"
   },
   "dependencies": {
+    "@types/node": "^25.2.3",
     "node-html-parser": "^6.1.13"
   },
   "devDependencies": {
