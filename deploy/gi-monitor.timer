@@ -1,0 +1,11 @@
+[Unit]
+Description=Run Games Island monitor every __INTERVAL__
+
+[Timer]
+OnBootSec=2min
+OnUnitActiveSec=__INTERVAL__
+# Spread requests a little so we don't hit the site on an exact beat
+RandomizedDelaySec=30s
+
+[Install]
+WantedBy=timers.target

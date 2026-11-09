@@ -1,11 +1,8 @@
 name: Games Island Stock Monitor
 
+# The monitor now runs on a Raspberry Pi (see README). This workflow is kept
+# for manual one-off runs only — re-add a schedule here if the Pi is retired.
 on:
-  schedule:
-    # Runs every hour — adjust cron as needed
-    # Format: minute hour day month weekday
-    - cron: "0 * * * *"
-  # Allows manual triggering from the Actions tab (useful for testing)
   workflow_dispatch:
 
 # Never run two monitors at once (they'd race on the Gist state)

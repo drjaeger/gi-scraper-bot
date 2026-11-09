@@ -20,6 +20,7 @@ export async function scrapeProducts(): Promise<ProductMap> {
         "Mozilla/5.0 (compatible; GamesIslandBot/1.0; stock-monitor)",
       Accept: "text/html",
     },
+    signal: AbortSignal.timeout(30_000),
   });
 
   if (!response.ok) {

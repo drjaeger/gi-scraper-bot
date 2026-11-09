@@ -33,3 +33,6 @@ coverage/
 .cache/
 temp/
 tmp/
+
+# Local state (Pi)
+data/

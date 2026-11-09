@@ -14,6 +14,7 @@ interface DiscordEmbed {
 // Discord color constants
 const COLOR_NEW = 0x00b0f4;      // Blue — new product
 const COLOR_RESTOCK = 0x57f287;  // Green — back in stock
+const COLOR_ERROR = 0xed4245;    // Red — monitor failing
 
 async function sendWebhook(embeds: DiscordEmbed[]): Promise<void> {
   if (!WEBHOOK_URL) {
@@ -29,6 +30,7 @@ async function sendWebhook(embeds: DiscordEmbed[]): Promise<void> {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ embeds: chunk }),
+      signal: AbortSignal.timeout(30_000),
     });
 
     if (!response.ok) {
@@ -74,4 +76,24 @@ export async function notifyBatch(
   console.log(
     `Notified: ${newProducts.length} new, ${restocked.length} restocked`
   );
+}
+// Monitor health alerts — sent once when runs start failing and once on recovery
+export async function notifyHealth(
+  status: "failing" | "recovered",
+  detail: string
+): Promise<void> {
+  await sendWebhook([
+    status === "failing"
+      ? {
+          title: "⚠️ Games Island monitor is failing",
+          description: detail.slice(0, 2000),
+          color: COLOR_ERROR,
+          footer: { text: "You'll get one more message when it recovers" },
+        }
+      : {
+          title: "✅ Games Island monitor recovered",
+          description: detail,
+          color: COLOR_RESTOCK,
+        },
+  ]);
 }

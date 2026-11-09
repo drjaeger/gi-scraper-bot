@@ -1,0 +1,13 @@
+[Unit]
+Description=Games Island MtG stock monitor (single run)
+Wants=network-online.target
+After=network-online.target
+
+[Service]
+Type=oneshot
+User=__USER__
+WorkingDirectory=__DIR__
+ExecStart=__NODE__ --env-file-if-exists=.env dist/index.js
+# Hard stop if something hangs (fetches already time out after 30s each)
+TimeoutStartSec=5min
+Nice=10
