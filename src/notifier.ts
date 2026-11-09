@@ -43,36 +43,6 @@ async function sendWebhook(embeds: DiscordEmbed[]): Promise<void> {
   }
 }
 
-export async function notifyNewProduct(product: Product): Promise<void> {
-  await sendWebhook([
-    {
-      title: `🆕 New Product: ${product.name}`,
-      url: product.url,
-      color: COLOR_NEW,
-      fields: [
-        { name: "Category", value: product.category, inline: true },
-        { name: "Status", value: "✅ In Stock", inline: true },
-      ],
-      footer: { text: "Games Island Monitor" },
-    },
-  ]);
-}
-
-export async function notifyRestocked(product: Product): Promise<void> {
-  await sendWebhook([
-    {
-      title: `🔄 Back in Stock: ${product.name}`,
-      url: product.url,
-      color: COLOR_RESTOCK,
-      fields: [
-        { name: "Category", value: product.category, inline: true },
-        { name: "Status", value: "✅ Available", inline: true },
-      ],
-      footer: { text: "Games Island Monitor" },
-    },
-  ]);
-}
-
 // Batched version — sends one message with multiple embeds when there are many changes
 export async function notifyBatch(
   newProducts: Product[],

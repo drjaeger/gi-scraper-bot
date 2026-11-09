@@ -1,7 +1,7 @@
 import { scrapeProducts } from "./scraper.js";
 import { loadState, saveState } from "./store.js";
 import { notifyBatch } from "./notifier.js";
-import type { Product, ProductMap } from "./types.js";
+import type { Product } from "./types.js";
 
 async function run(): Promise<void> {
   console.log(`[${new Date().toISOString()}] Starting Games Island monitor...`);
@@ -16,6 +16,16 @@ async function run(): Promise<void> {
 
   // 2. Scrape current state
   const currentState = await scrapeProducts();
+
+  // Sanity check: a sudden large drop usually means a partial/broken page,
+  // not a real catalogue change. Refuse to overwrite good state with it.
+  const prevCount = Object.keys(previousState).length;
+  const currCount = Object.keys(currentState).length;
+  if (!isFirstRun && currCount < prevCount * 0.5) {
+    throw new Error(
+      `Scraped ${currCount} products vs ${prevCount} last run — refusing to save suspicious state`
+    );
+  }
 
   // 3. Diff — find new products and restocked products
   const newProducts: Product[] = [];

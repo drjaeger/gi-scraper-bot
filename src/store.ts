@@ -25,11 +25,9 @@ export async function loadState(): Promise<ProductMap> {
   const response = await fetch(GIST_API, { headers });
 
   if (!response.ok) {
-    if (response.status === 404) {
-      console.log("Gist not found — starting with empty state");
-      return {};
-    }
-    throw new Error(`Failed to load Gist: ${response.status}`);
+    // Includes 404: a wrong GIST_ID must fail loudly, otherwise every run
+    // looks like a first run and no notifications are ever sent
+    throw new Error(`Failed to load Gist ${GIST_ID}: ${response.status}`);
   }
 
   const gist = await response.json();

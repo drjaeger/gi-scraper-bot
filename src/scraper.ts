@@ -32,44 +32,47 @@ export async function scrapeProducts(): Promise<ProductMap> {
   const products: ProductMap = {};
   let currentCategory = "Uncategorized";
 
-  // The page is a table — iterate all rows
-  const rows = root.querySelectorAll("tr");
+  // The page is a table of category header rows (tr.kategorie) followed by
+  // product rows (tr.artikel: name/link cell + stock status cell)
+  const rows = root.querySelectorAll("tr.kategorie, tr.artikel");
 
   for (const row of rows) {
-    const cells = row.querySelectorAll("td");
-
-    if (cells.length === 0) continue;
-
-    // Category header rows have bold "Kategorie" text and a link
-    if (cells.length === 1 || row.querySelector("b")) {
-      const categoryLink = row.querySelector("a");
-      if (categoryLink) {
-        currentCategory = categoryLink.text.trim();
+    if (row.classList.contains("kategorie")) {
+      // Header has two links: "[ /c/path ]" (crawlme) then the readable name
+      const links = row.querySelectorAll("a");
+      const nameLink = links[links.length - 1];
+      if (nameLink) {
+        currentCategory = nameLink.text.trim();
       }
       continue;
     }
 
-    // Product rows have 2 cells: name/link and stock status
-    if (cells.length >= 2) {
-      const link = cells[0].querySelector("a");
-      if (!link) continue;
+    const cells = row.querySelectorAll("td");
+    if (cells.length < 2) continue;
 
-      const name = link.text.trim();
-      const href = link.getAttribute("href") ?? "";
-      const stockText = cells[1].text.trim();
+    const link = cells[0].querySelector("a");
+    if (!link) continue;
 
-      if (!name || !href) continue;
+    const name = link.text.trim();
+    const href = link.getAttribute("href") ?? "";
+    const stockText = cells[1].text.trim();
 
-      // Build absolute URL — crawlme URLs are relative paths
-      const url = href.startsWith("http") ? href : `${BASE_URL}${href}`;
+    if (!name || !href) continue;
 
-      products[url] = {
-        name,
-        url,
-        inStock: isInStock(stockText),
-        category: currentCategory,
-      };
-    }
+    // Product links are absolute today; handle relative ones just in case
+    const url = href.startsWith("http") ? href : `${BASE_URL}${href}`;
+
+    products[url] = {
+      name,
+      url,
+      inStock: isInStock(stockText),
+      category: currentCategory,
+    };
+  }
+
+  if (Object.keys(products).length === 0) {
+    // Layout change or blocked request — don't let an empty result overwrite state
+    throw new Error("Scraped 0 products — page layout may have changed");
   }
 
   console.log(`Scraped ${Object.keys(products).length} products`);
